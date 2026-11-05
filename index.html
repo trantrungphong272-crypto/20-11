@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tri ân Thầy Cô · 20/11</title>
+  <meta name="description" content="Trang web tri ân thầy cô nhân ngày Nhà giáo Việt Nam 20/11 — gửi gắm những lời yêu thương." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Dancing+Script:wght@600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'system-ui', 'sans-serif'],
+            script: ['"Dancing Script"', 'cursive'],
+          },
+          colors: {
+            cream: '#FFFBF6',
+            ink: '#4A3B32',
+            peach: {
+              50: '#FFF7F0', 100: '#FFEEDF', 200: '#FFDCC0', 300: '#FFC79B',
+              400: '#FFAE74', 500: '#F79450', 600: '#E07A38', 700: '#B85C26',
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body { background-color: #fffbf6; overflow-x: hidden; }
+
+    #petalCanvas {
+      position: fixed; inset: 0; width: 100%; height: 100%;
+      pointer-events: none; z-index: 40; opacity: 0.85;
+    }
+
+    .reveal {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity 0.9s ease, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: opacity, transform;
+    }
+    .reveal.is-visible { opacity: 1; transform: none; }
+
+    .card-scene { perspective: 1800px; height: 540px; }
+    @media (min-width: 768px) { .card-scene { height: 560px; } }
+    .card-inner {
+      position: relative; width: 100%; height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 1s cubic-bezier(0.4, 0.15, 0.2, 1);
+    }
+    .card-inner.flipped { transform: rotateY(180deg); }
+    .card-face {
+      position: absolute; inset: 0;
+      backface-visibility: hidden; -webkit-backface-visibility: hidden;
+      border-radius: 28px; overflow: hidden;
+    }
+    .card-back { transform: rotateY(180deg); }
+
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .floaty { animation: floaty 5s ease-in-out infinite; }
+
+    @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+    .caret {
+      display: inline-block; width: 2px; height: 1em; margin-left: 4px;
+      vertical-align: -0.12em; background: #e07a38;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.85) translateY(20px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .pop-in { animation: popIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+    .thin-scroll::-webkit-scrollbar { width: 6px; }
+    .thin-scroll::-webkit-scrollbar-track { background: transparent; }
+    .thin-scroll::-webkit-scrollbar-thumb { background: #ffd9b8; border-radius: 999px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      .floaty { animation: none; }
+      #petalCanvas { display: none; }
+    }
+  </style>
+</head>
+
+<body class="font-sans text-ink antialiased bg-cream">
+  <canvas id="petalCanvas" aria-hidden="true"></canvas>
+
+  <!-- ================= HERO ================= -->
+  <header class="relative isolate min-h-screen flex items-center justify-center overflow-hidden px-5 py-24">
+    <div class="absolute inset-0 -z-10 bg-gradient-to-b from-[#FFF8F1] via-[#FFEFE0] to-[#FFE1CC]"></div>
+    <div class="absolute -z-10 -top-32 -left-32 w-[420px] h-[420px] rounded-full bg-[#FFD3A8] opacity-70 blur-[110px]"></div>
+    <div class="absolute -z-10 -bottom-40 -right-32 w-[480px] h-[480px] rounded-full bg-[#FFC9C9] opacity-60 blur-[120px]"></div>
+    <div class="absolute -z-10 top-1/3 right-[8%] w-[300px] h-[300px] rounded-full bg-[#FFE7A8] opacity-60 blur-[100px]"></div>
+
+    <div class="relative z-10 text-center max-w-3xl mx-auto">
+      <p class="reveal inline-block rounded-full bg-white/70 backdrop-blur px-5 py-2 text-[11px] sm:text-xs font-semibold tracking-[0.35em] uppercase text-peach-700 shadow-sm ring-1 ring-white">
+        20 · 11 · Ngày Nhà giáo Việt Nam
+      </p>
+
+      <h1 class="reveal mt-7 font-script text-6xl sm:text-7xl md:text-8xl leading-[1.05] text-[#B85C26] drop-shadow-sm">
+        Tri ân Thầy Cô
+      </h1>
+
+      <div class="reveal mt-6 flex items-center justify-center gap-3">
+        <span class="h-px w-12 sm:w-20 bg-gradient-to-r from-transparent to-peach-300"></span>
+        <span class="text-2xl">🌷</span>
+        <span class="h-px w-12 sm:w-20 bg-gradient-to-l from-transparent to-peach-300"></span>
+      </div>
+
+      <div class="mt-7 min-h-[110px] sm:min-h-[90px] flex items-start justify-center px-2">
+        <p id="typewriter" class="text-base sm:text-lg md:text-xl leading-relaxed text-ink/70 font-light max-w-2xl">
+          <span class="caret"></span>
+        </p>
+      </div>
+
+      <a href="#thiep"
+        class="reveal mt-10 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#F79450] to-[#E0763A] px-8 py-3.5 text-white font-semibold shadow-lg shadow-orange-200/80 transition hover:brightness-105 hover:shadow-xl active:scale-[0.98]">
+        Mở tấm thiệp tri ân
+        <span class="text-lg">💌</span>
+      </a>
+
+      <div class="reveal mt-16 flex justify-center">
+        <a href="#thiep" class="text-peach-600/70 animate-bounce text-2xl" aria-label="Cuộn xuống">↓</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= THIỆP CHÚC MỪNG ================= -->
+  <section id="thiep" class="relative isolate py-20 md:py-28 px-5 overflow-hidden">
+    <div class="absolute inset-0 -z-10 bg-gradient-to-b from-[#FFE1CC] via-[#FFF7F0] to-[#FFFBF6]"></div>
+
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center mb-12 md:mb-16 reveal">
+        <span class="inline-block text-xs font-semibold tracking-[0.3em] uppercase text-peach-600">Tấm thiệp nhỏ</span>
+        <h2 class="mt-4 font-script text-4xl sm:text-5xl md:text-6xl text-[#B85C26]">Gửi trao yêu thương</h2>
+        <p class="mt-4 text-ink/60 text-sm sm:text-base">
+          Nhấn vào tấm thiệp để mở ra những lời chân thành nhất 💌
+        </p>
+      </div>
+
+      <div class="card-scene reveal mx-auto max-w-2xl floaty" id="cardScene">
+        <div class="card-inner" id="cardInner">
+          <div class="card-face" id="cardFront" role="button" tabindex="0" aria-label="Mở thiệp tri ân">
+            <div class="relative h-full w-full rounded-[28px] bg-gradient-to-br from-[#FFFDF9] via-[#FFF4E8] to-[#FFE3CB] border border-white shadow-[0_30px_70px_-25px_rgba(184,92,38,0.45)] flex flex-col items-center justify-center p-8 cursor-pointer transition-transform duration-500 hover:scale-[1.01]">
+              <div class="pointer-events-none absolute inset-3 rounded-[22px] border border-[#E9C7A5]/70"></div>
+              <div class="pointer-events-none absolute inset-5 rounded-[18px] border border-dashed border-[#E9C7A5]/50"></div>
+
+              <span class="absolute top-6 left-6 text-2xl opacity-70 select-none">🌸</span>
+              <span class="absolute top-6 right-6 text-2xl opacity-70 select-none">🌿</span>
+              <span class="absolute bottom-6 left-6 text-2xl opacity-70 select-none">🍃</span>
+              <span class="absolute bottom-6 right-6 text-2xl opacity-70 select-none">🌼</span>
+
+              <div class="relative flex flex-col items-center text-center">
+                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-[#F79E6B] to-[#D9692F] shadow-lg shadow-orange-300/60 ring-8 ring-white/50 flex items-center justify-center text-3xl select-none">
+                  💐
+                </div>
+                <p class="mt-7 font-script text-4xl sm:text-5xl text-[#B85C26]">Thiệp tri ân</p>
+                <p class="mt-3 text-[11px] sm:text-xs tracking-[0.45em] uppercase text-peach-600/80">20 · 11</p>
+                <div class="mt-9 inline-flex items-center gap-2 rounded-full bg-white/80 px-5 py-2.5 text-sm font-medium text-peach-700 shadow-sm ring-1 ring-peach-200 animate-pulse">
+                  <span>Nhấn để mở thiệp</span>
+                  <span>✨</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-face card-back">
+            <div class="h-full w-full rounded-[28px] bg-white/95 backdrop-blur border border-white shadow-[0_30px_70px_-25px_rgba(184,92,38,0.45)] flex flex-col overflow-hidden">
+              <div class="flex items-center justify-between gap-3 bg-gradient-to-r from-[#F79450] to-[#E0763A] px-5 sm:px-7 py-4 text-white shrink-0">
+                <span class="font-script text-2xl sm:text-3xl leading-none">Gửi thầy cô kính yêu</span>
+                <button id="closeCard"
+                  class="shrink-0 w-9 h-9 rounded-full bg-white/20 hover:bg-white/35 transition flex items-center justify-center text-lg leading-none"
+                  aria-label="Đóng thiệp">✕</button>
+              </div>
+
+              <div class="thin-scroll flex-1 overflow-y-auto px-5 sm:px-8 py-6 space-y-4 text-[14.5px] sm:text-[15px] leading-[1.9] text-ink/80">
+                <p>Kính gửi các thầy cô —</p>
+                <p>
+                  Có những điều con chưa từng nói ra, nhưng vẫn luôn nằm yên trong tim:
+                  <em class="text-peach-700 not-italic font-medium">cảm ơn thầy cô</em> vì đã kiên nhẫn với những ngày con chưa hiểu bài,
+                  vì đã tin vào con ngay cả khi chính con còn chưa tin vào mình.
+                </p>
+                <p>
+                  Những trang giáo án sáng đèn, những buổi chiều tan học muộn, những lời nhắc nhở tưởng như nhỏ bé ấy —
+                  hoá ra lại chính là hành trang lớn nhất mà con mang theo suốt cuộc đời.
+                </p>
+                <p>
+                  Con biết ơn vì đã được lớn lên dưới bàn tay dịu dàng và nghiêm khắc của thầy cô.
+                  Cảm ơn vì đã dạy con không chỉ những con chữ, mà còn cách làm một người tử tế.
+                </p>
+                <p>
+                  Nhân ngày 20/11, con chỉ mong thầy cô thật nhiều sức khoẻ, thật nhiều niềm vui,
+                  và luôn biết rằng: ở đâu đó, vẫn có những học trò luôn nhớ về thầy cô với tất cả lòng biết ơn.
+                </p>
+                <p class="text-right font-script text-2xl sm:text-3xl text-peach-600 pt-3 pr-1">
+                  — Học trò của thầy cô —
+                </p>
+                <div class="pt-2 pb-1 text-center">
+                  <button id="closeCardBottom"
+                    class="rounded-full bg-peach-100 hover:bg-peach-200 transition px-6 py-2.5 text-sm font-medium text-peach-700">
+                    Đóng thiệp lại
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TƯỜNG TRI ÂN ================= -->
+  <section id="tuong-tri-an" class="relative isolate py-20 md:py-28 px-5 overflow-hidden">
+    <div class="absolute inset-0 -z-10 bg-gradient-to-b from-[#FFFBF6] via-[#FFF6EC] to-[#FFF1E4]"></div>
+    <div class="absolute -z-10 -top-24 right-0 w-[380px] h-[380px] rounded-full bg-[#FFE0C2] opacity-50 blur-[110px]"></div>
+
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-12 md:mb-14 reveal">
+        <span class="inline-block text-xs font-semibold tracking-[0.3em] uppercase text-peach-600">Góc kỷ niệm</span>
+        <h2 class="mt-4 font-script text-4xl sm:text-5xl md:text-6xl text-[#B85C26]">Tường lời tri ân</h2>
+        <p class="mt-4 text-ink/60 text-sm sm:text-base max-w-xl mx-auto">
+          Mỗi lời chúc là một bông hoa nhỏ, cùng nhau kết thành vườn yêu thương dành tặng thầy cô.
+        </p>
+        <div class="mt-5 flex flex-wrap items-center justify-center gap-2">
+          <p class="inline-flex items-center gap-2 rounded-full bg-white/80 px-5 py-2 text-sm text-peach-700 shadow-sm ring-1 ring-peach-200">
+            <span>🌷</span>
+            <span><strong id="wishCount">0</strong> lời chúc đã được gửi gắm</span>
+          </p>
+          <p class="inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 text-xs text-amber-700 shadow-sm ring-1 ring-amber-200">
+            <span>⏳</span>
+            <span>Mỗi lời chúc được lưu <strong>30 ngày</strong></span>
+          </p>
+        </div>
+      </div>
+
+      <div id="wall" class="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </div>
+  </section>
+
+  <!-- ================= FORM GỬI LỜI CHÚC ================= -->
+  <section id="gui-loi-chuc" class="relative isolate py-20 md:py-28 px-5 overflow-hidden">
+    <div class="absolute inset-0 -z-10 bg-gradient-to-b from-[#FFF1E4] via-[#FFEEDF] to-[#FFE4D2]"></div>
+
+    <div class="max-w-2xl mx-auto">
+      <div class="reveal rounded-[28px] bg-gradient-to-br from-white to-[#FFF6EC] border border-white shadow-[0_30px_70px_-35px_rgba(184,92,38,0.55)] p-7 sm:p-10">
+        <div class="text-center">
+          <span class="text-3xl">✍️</span>
+          <h2 class="mt-3 font-script text-3xl sm:text-4xl text-[#B85C26]">Gửi một lời tri ân</h2>
+          <p class="mt-3 text-sm text-ink/60">
+            Lời chúc của bạn sẽ xuất hiện ngay trên tường tri ân phía trên.
+          </p>
+          <p class="mt-1 text-xs text-amber-700/80 inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 ring-1 ring-amber-200/70">
+            <span>⏳</span>
+            <span>Lời chúc được lưu trong 30 ngày, sau đó sẽ tự động biến mất.</span>
+          </p>
+        </div>
+
+        <form id="wishForm" class="mt-8 space-y-5" novalidate>
+          <div>
+            <label for="name" class="block text-sm font-semibold mb-2 text-ink/80">Tên của bạn</label>
+            <input id="name" name="name" type="text" maxlength="40" required
+              placeholder="Ví dụ: Nguyễn Văn A"
+              class="w-full rounded-xl border border-peach-200 bg-white/90 px-4 py-3 text-[15px] outline-none transition placeholder:text-ink/30 focus:border-peach-400 focus:ring-4 focus:ring-peach-200/50" />
+          </div>
+
+          <div>
+            <label for="message" class="block text-sm font-semibold mb-2 text-ink/80">Lời chúc gửi thầy cô</label>
+            <textarea id="message" name="message" rows="4" maxlength="300" required
+              placeholder="Cảm ơn thầy cô vì đã..."
+              class="w-full rounded-xl border border-peach-200 bg-white/90 px-4 py-3 text-[15px] leading-relaxed outline-none transition resize-none placeholder:text-ink/30 focus:border-peach-400 focus:ring-4 focus:ring-peach-200/50"></textarea>
+            <div class="mt-1.5 text-right text-xs text-ink/40">
+              <span id="charCount">0</span>/300
+            </div>
+          </div>
+
+          <button type="submit"
+            class="w-full rounded-xl bg-gradient-to-r from-[#F79450] to-[#E0763A] py-3.5 font-semibold text-white shadow-lg shadow-orange-200/80 transition hover:brightness-105 hover:shadow-xl active:scale-[0.99]">
+            Gửi lời chúc 💌
+          </button>
+
+          <p id="formMsg" class="text-center text-sm min-h-[20px] font-medium"></p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="relative isolate overflow-hidden bg-[#4A3B32] text-[#F5E6D8] px-5 py-16">
+    <div class="absolute -z-10 -top-24 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-[#B85C26] opacity-30 blur-[100px]"></div>
+
+    <div class="max-w-3xl mx-auto text-center">
+      <p class="font-script text-3xl sm:text-4xl text-[#FFD9B3]">Cảm ơn thầy cô, vì tất cả</p>
+
+      <p class="mt-5 text-sm sm:text-base leading-relaxed text-[#E8D6C6] max-w-xl mx-auto">
+        Có một nghề mà mỗi ngày đến lớp đều là một lần gieo hạt.
+        Cảm ơn những người đã kiên nhẫn chờ đợi mùa hoa nở —
+        và tin rằng mỗi học trò đều xứng đáng được nở rộ.
+      </p>
+
+      <div class="mt-8 flex items-center justify-center gap-3 text-xl select-none">
+        <span>🌸</span><span>🌼</span><span>🌷</span><span>🌿</span><span>🍃</span>
+      </div>
+
+      <div class="mt-10 h-px w-full bg-gradient-to-r from-transparent via-[#8A7263] to-transparent"></div>
+
+      <p class="mt-8 text-sm text-[#C9B5A4]">
+        Trang web nhỏ này được làm bằng cả trái tim
+        <span class="text-[#FFB088]">♥</span>
+      </p>
+      <p class="mt-2 text-xs text-[#A8907D]">
+        Kính tặng các thầy cô giáo — nhân ngày Nhà giáo Việt Nam 20/11
+      </p>
+      <p class="mt-4 text-xs text-[#8A7263]">
+        © <span id="year"></span> · Made with love
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    /* =========================================================
+       0. CẤU HÌNH CHÍNH
+       ========================================================= */
+    // Số ngày một lời chúc được lưu trước khi tự động biến mất
+    const WISH_LIFETIME_DAYS = 30;
+    const WISH_LIFETIME_MS = WISH_LIFETIME_DAYS * 24 * 60 * 60 * 1000;
+
+    /* ---------------------------------------------------------
+       TÙY CHỌN: Lưu trữ DÙNG CHUNG trên web (hiển thị với MỌI người)
+       ---------------------------------------------------------
+       Mặc định (để trống): lời chúc chỉ lưu trên trình duyệt của
+       người gửi (localStorage). Vẫn có hạn 30 ngày.
+
+       Muốn lời chúc hiển thị với TẤT CẢ người truy cập trang, chỉ
+       cần làm 4 bước (miễn phí, ~3 phút):
+
+       1. Vào https://console.firebase.google.com → "Add project"
+       2. Trong project: Build → Realtime Database → "Create Database"
+          → chọn location → "Start in test mode"
+       3. Vào tab "Rules", dán rules sau rồi Publish:
+            { "rules": { ".read": true, ".write": true } }
+       4. Copy URL dạng:
+            https://TEN-PROJECT-default-rtdb.firebaseio.com
+          và dán vào biến dưới đây (không có dấu "/" ở cuối).
+       --------------------------------------------------------- */
+    const SHARED_DB_URL = 'https://loi-chuc-2011-default-rtdb.asia-southeast1.firebasedatabase.app/loichuc'; // Ví dụ: 'https://abc-123-default-rtdb.firebaseio.com/loichuc'
+
+    /* =========================================================
+       1. HIỆU ỨNG CÁNH HOA RƠI
+       ========================================================= */
+    (function initPetals() {
+      const canvas = document.getElementById('petalCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      let W = 0, H = 0;
+      const COLORS = ['#FFCBA4', '#FFD9B3', '#FFB088', '#FFE8D6', '#F9C784', '#FFD6D6'];
+      const isMobile = window.matchMedia('(max-width: 768px)').matches;
+      const COUNT = isMobile ? 20 : 38;
+      const petals = [];
+
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      function makePetal(spawnAnywhere) {
+        return {
+          x: Math.random() * W,
+          y: spawnAnywhere ? Math.random() * H : -30,
+          r: 4 + Math.random() * 6,
+          speedY: 0.25 + Math.random() * 0.85,
+          speedX: -0.35 + Math.random() * 0.7,
+          angle: Math.random() * Math.PI * 2,
+          spin: -0.02 + Math.random() * 0.04,
+          sway: Math.random() * Math.PI * 2,
+          swaySpeed: 0.008 + Math.random() * 0.02,
+          color: COLORS[Math.floor(Math.random() * COLORS.length)],
+          alpha: 0.3 + Math.random() * 0.5,
+        };
+      }
+
+      for (let i = 0; i < COUNT; i++) petals.push(makePetal(true));
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        for (const p of petals) {
+          p.y += p.speedY;
+          p.sway += p.swaySpeed;
+          p.x += p.speedX + Math.sin(p.sway) * 0.6;
+          p.angle += p.spin;
+
+          if (p.y > H + 30) {
+            Object.assign(p, makePetal(false));
+            p.x = Math.random() * W;
+          }
+          if (p.x < -40) p.x = W + 30;
+          if (p.x > W + 40) p.x = -30;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.angle);
+          ctx.globalAlpha = p.alpha;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, p.r, p.r * 0.58, 0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    /* =========================================================
+       2. TYPEWRITER
+       ========================================================= */
+    (function initTypewriter() {
+      const el = document.getElementById('typewriter');
+      if (!el) return;
+
+      const QUOTES = [
+        'Một người thầy tốt giống như một ngọn nến — cháy hết mình để soi sáng con đường của người khác.',
+        'Nghề dạy học là nghề cao quý nhất trong những nghề cao quý, vì nó sáng tạo ra những con người sáng tạo.',
+        'Cảm ơn thầy cô — không chỉ dạy chúng em con chữ, mà còn dạy chúng em cách làm người.',
+        'Ơn thầy cô như nước nguồn chảy mãi, chúng em chỉ là những con thuyền nhỏ được chở che trên dòng sông ấy.',
+      ];
+
+      const caret = document.createElement('span');
+      caret.className = 'caret';
+      el.textContent = '';
+      el.appendChild(caret);
+
+      let qIndex = 0, charIndex = 0, deleting = false;
+
+      function tick() {
+        const full = QUOTES[qIndex];
+        if (!deleting) {
+          charIndex++;
+          el.textContent = full.slice(0, charIndex);
+          el.appendChild(caret);
+          if (charIndex === full.length) {
+            deleting = true;
+            return setTimeout(tick, 2400);
+          }
+          return setTimeout(tick, 55);
+        }
+        charIndex--;
+        el.textContent = full.slice(0, charIndex);
+        el.appendChild(caret);
+        if (charIndex === 0) {
+          deleting = false;
+          qIndex = (qIndex + 1) % QUOTES.length;
+          return setTimeout(tick, 420);
+        }
+        return setTimeout(tick, 26);
+      }
+      setTimeout(tick, 700);
+    })();
+
+    /* =========================================================
+       3. THIỆP LẬT 3D
+       ========================================================= */
+    (function initCard() {
+      const inner = document.getElementById('cardInner');
+      const front = document.getElementById('cardFront');
+      const closeTop = document.getElementById('closeCard');
+      const closeBottom = document.getElementById('closeCardBottom');
+      if (!inner || !front) return;
+
+      const open = () => inner.classList.add('flipped');
+      const close = () => inner.classList.remove('flipped');
+
+      front.addEventListener('click', open);
+      front.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+      });
+      if (closeTop) closeTop.addEventListener('click', (e) => { e.stopPropagation(); close(); });
+      if (closeBottom) closeBottom.addEventListener('click', (e) => { e.stopPropagation(); close(); });
+    })();
+
+    /* =========================================================
+       4. TƯỜNG TRI ÂN + LƯU TRỮ 30 NGÀY + ĐỒNG BỘ TÙY CHỌN
+       ========================================================= */
+    (function initWall() {
+      const wallEl = document.getElementById('wall');
+      const countEl = document.getElementById('wishCount');
+      const form = document.getElementById('wishForm');
+      const nameInput = document.getElementById('name');
+      const msgInput = document.getElementById('message');
+      const charCount = document.getElementById('charCount');
+      const formMsg = document.getElementById('formMsg');
+      if (!wallEl) return;
+
+      const STORAGE_KEY = 'loiChuc2011_v1';
+
+      /* --- Dữ liệu mẫu (luôn hiển thị, không bị hết hạn) --- */
+      const DEFAULT_WISHES = [
+        { emoji: '🌸', name: 'Nguyễn Minh Anh', text: 'Cảm ơn cô vì những buổi chiều cô ở lại sửa từng lỗi sai cho em. Cô không biết đâu, chính những lần ấy đã dạy em rằng: kiên nhẫn là một món quà.' },
+        { emoji: '🌿', name: 'Trần Quốc Bảo', text: 'Thầy ơi, em vẫn nhớ câu thầy nói ngày tốt nghiệp: "Đi xa rồi nhớ quay về nhé." Giờ em đi xa thật rồi, và em vẫn luôn nhớ đường về.' },
+        { emoji: '🌼', name: 'Lê Thu Hà', text: 'Cô là người đầu tiên nói với em rằng em có thể làm được. Chỉ một câu thôi, nhưng em mang theo nó suốt mười năm nay.' },
+        { emoji: '🌷', name: 'Phạm Đức Duy', text: 'Cảm ơn thầy vì đã không bỏ rơi đứa học trò cá biệt ngày nào. Thầy đã tin em khi cả trường không tin. Ơn này em khắc ghi.' },
+        { emoji: '🍃', name: 'Hoàng Mai Linh', text: 'Mỗi bài giảng của cô là một cánh cửa mở ra thế giới. Cảm ơn cô đã mở thật nhiều cánh cửa cho chúng em.' },
+        { emoji: '🌻', name: 'Vũ Thanh Tùng', text: 'Thầy cô ơi, chúng em lớn lên rồi, nhưng mỗi lần đi ngang cổng trường, tim vẫn đập nhanh như ngày đầu tiên vào lớp 10. Cảm ơn thầy cô vì tuổi trẻ ấy.' },
+      ];
+
+      const PALETTES = [
+        'bg-[#FFF6EC] border-[#FFE0C2]',
+        'bg-[#FFF9F0] border-[#FFEAC8]',
+        'bg-[#FFF3F1] border-[#FFD9D2]',
+        'bg-[#F7FBF6] border-[#DCEDD8]',
+        'bg-[#F6F8FF] border-[#DCE3F5]',
+      ];
+      const EMOJIS = ['🌸', '🌿', '🌼', '🌷', '🍃', '🌻', '💐', '✨'];
+
+      /* --- Bộ lọc / hạn 30 ngày --- */
+      function isExpired(wish) {
+        return typeof wish.createdAt === 'number' && (Date.now() - wish.createdAt) > WISH_LIFETIME_MS;
+      }
+      function filterActive(list) {
+        return list.filter(w => !isExpired(w));
+      }
+      function daysLeft(wish) {
+        if (typeof wish.createdAt !== 'number') return WISH_LIFETIME_DAYS;
+        return Math.ceil((wish.createdAt + WISH_LIFETIME_MS - Date.now()) / (24 * 60 * 60 * 1000));
+      }
+
+      /* --- localStorage --- */
+      function readLocal() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          const data = raw ? JSON.parse(raw) : [];
+          if (!Array.isArray(data)) return [];
+          // Migration: bổ sung createdAt cho dữ liệu cũ
+          return data.map(w => ({
+            ...w,
+            createdAt: typeof w.createdAt === 'number' ? w.createdAt : Date.now(),
+          }));
+        } catch { return []; }
+      }
+      function writeLocal(list) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch {}
+      }
+
+      /* --- Đồng bộ dùng chung qua Firebase REST (nếu có cấu hình) --- */
+      const sharedEnabled = !!SHARED_DB_URL;
+      const sharedBase = sharedEnabled ? SHARED_DB_URL.replace(/\/+$/, '') : '';
+
+      async function fetchShared() {
+        if (!sharedEnabled) return [];
+        try {
+          const res = await fetch(sharedBase + '.json');
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+          if (!data) return [];
+          return Object.entries(data).map(([k, v]) => ({
+            ...v,
+            id: v && v.id ? v.id : k,
+            createdAt: v && typeof v.createdAt === 'number' ? v.createdAt : Date.now(),
+          }));
+        } catch (e) {
+          console.warn('[Shared] Không tải được lời chúc dùng chung:', e);
+          return [];
+        }
+      }
+
+      async function putShared(wish) {
+        if (!sharedEnabled) return;
+        try {
+          await fetch(sharedBase + '/' + wish.id + '.json', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(wish),
+          });
+        } catch (e) { console.warn('[Shared] Không lưu được lên shared DB:', e); }
+      }
+
+      async function deleteShared(id) {
+        if (!sharedEnabled) return;
+        try {
+          await fetch(sharedBase + '/' + id + '.json', { method: 'DELETE' });
+        } catch (e) { console.warn('[Shared] Không xoá được trên shared DB:', e); }
+      }
+
+      /* --- Trạng thái --- */
+      let userWishes = filterActive(readLocal());
+      writeLocal(userWishes);
+
+      /* --- IntersectionObserver cho hiệu ứng reveal --- */
+      const io = ('IntersectionObserver' in window)
+        ? new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                io.unobserve(entry.target);
+              }
+            });
+          }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' })
+        : null;
+
+      function observe(el) {
+        if (io) io.observe(el);
+        else el.classList.add('is-visible');
+      }
+
+      /* --- Xây dựng một thẻ lời chúc --- */
+      function buildCard(wish, index, isUserWish) {
+        const card = document.createElement('article');
+        card.className =
+          'wish-card reveal rounded-2xl border p-6 flex flex-col ' +
+          PALETTES[index % PALETTES.length] +
+          ' shadow-[0_10px_30px_-18px_rgba(184,92,38,0.4)] ' +
+          'transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_45px_-20px_rgba(184,92,38,0.55)]';
+
+        const emojiEl = document.createElement('div');
+        emojiEl.className = 'text-3xl mb-3 select-none';
+        emojiEl.textContent = wish.emoji || EMOJIS[index % EMOJIS.length];
+        card.appendChild(emojiEl);
+
+        const textEl = document.createElement('p');
+        textEl.className = 'flex-1 text-[15px] leading-relaxed text-ink/80';
+        textEl.textContent = wish.text;
+        card.appendChild(textEl);
+
+        // Dòng chân: tên + nút xoá
+        const footerRow = document.createElement('div');
+        footerRow.className = 'mt-5 flex items-center justify-between gap-3';
+
+        const nameEl = document.createElement('span');
+        nameEl.className = 'font-semibold text-[15px] text-peach-700 truncate';
+        nameEl.textContent = '— ' + wish.name;
+        footerRow.appendChild(nameEl);
+
+        if (isUserWish) {
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.className =
+            'shrink-0 w-8 h-8 rounded-full text-ink/40 hover:text-red-500 hover:bg-red-50 transition flex items-center justify-center text-sm';
+          delBtn.setAttribute('aria-label', 'Xoá lời chúc');
+          delBtn.title = 'Xoá lời chúc của bạn';
+          delBtn.textContent = '✕';
+          delBtn.addEventListener('click', () => {
+            userWishes = userWishes.filter(w => w.id !== wish.id);
+            writeLocal(userWishes);
+            deleteShared(wish.id); // fire and forget
+            renderWall();
+          });
+          footerRow.appendChild(delBtn);
+        }
+        card.appendChild(footerRow);
+
+        // Chỉ hiện hạn cho lời chúc người dùng gửi
+        if (isUserWish) {
+          const left = daysLeft(wish);
+          const expEl = document.createElement('div');
+          expEl.className = 'mt-3 pt-3 border-t border-current/5 flex items-center gap-1.5 text-[11px] font-medium tracking-wide';
+          if (left <= 1) {
+            expEl.classList.add('text-red-500/80');
+            expEl.innerHTML = '<span>⏳</span><span>Hết hạn trong hôm nay</span>';
+          } else if (left <= 5) {
+            expEl.classList.add('text-amber-600');
+            expEl.innerHTML = '<span>⏳</span><span>Còn ' + left + ' ngày</span>';
+          } else {
+            expEl.classList.add('text-ink/40');
+            expEl.innerHTML = '<span>⏳</span><span>Còn ' + left + ' / ' + WISH_LIFETIME_DAYS + ' ngày</span>';
+          }
+          card.appendChild(expEl);
+        }
+
+        return card;
+      }
+
+      /* --- Render toàn bộ tường --- */
+      function renderWall(highlightId) {
+        wallEl.innerHTML = '';
+
+        const active = filterActive(userWishes);
+        if (active.length !== userWishes.length) {
+          userWishes = active;
+          writeLocal(userWishes);
+        }
+
+        const all = active
+          .map(w => ({ wish: w, isUser: true }))
+          .concat(DEFAULT_WISHES.map(w => ({ wish: w, isUser: false })));
+
+        all.forEach((item, index) => {
+          const card = buildCard(item.wish, index, item.isUser);
+          if (highlightId && item.wish.id === highlightId) {
+            card.classList.add('is-visible', 'pop-in');
+          } else {
+            observe(card);
+          }
+          wallEl.appendChild(card);
+        });
+
+        if (countEl) countEl.textContent = all.length;
+      }
+
+      /* --- Đếm ký tự --- */
+      if (msgInput && charCount) {
+        msgInput.addEventListener('input', () => { charCount.textContent = msgInput.value.length; });
+      }
+
+      /* --- Gửi lời chúc --- */
+      let msgTimer = null;
+      function showMessage(text, colorClass) {
+        if (!formMsg) return;
+        formMsg.textContent = text;
+        formMsg.className = 'text-center text-sm min-h-[20px] font-medium ' + colorClass;
+        clearTimeout(msgTimer);
+        msgTimer = setTimeout(() => { formMsg.textContent = ''; }, 5000);
+      }
+
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const name = (nameInput.value || '').trim();
+          const text = (msgInput.value || '').trim();
+
+          if (name.length < 2) {
+            showMessage('Vui lòng nhập tên của bạn (ít nhất 2 ký tự).', 'text-red-500');
+            nameInput.focus(); return;
+          }
+          if (text.length < 5) {
+            showMessage('Lời chúc cần dài hơn một chút nhé (ít nhất 5 ký tự).', 'text-red-500');
+            msgInput.focus(); return;
+          }
+
+          const now = Date.now();
+          const newWish = {
+            id: now.toString(36) + Math.random().toString(36).slice(2, 7),
+            name, text,
+            emoji: EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
+            createdAt: now,
+          };
+
+          userWishes.unshift(newWish);
+          writeLocal(userWishes);
+          putShared(newWish); // fire and forget
+          renderWall(newWish.id);
+
+          form.reset();
+          if (charCount) charCount.textContent = '0';
+          showMessage('Cảm ơn bạn! Lời chúc đã được gửi lên tường tri ân 🌷', 'text-green-600');
+
+          setTimeout(() => {
+            const firstCard = wallEl.firstElementChild;
+            if (firstCard) firstCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 120);
+        });
+      }
+
+      /* --- Khởi động --- */
+      renderWall();
+
+      // Nếu có cấu hình shared DB → tải + gộp + đẩy dữ liệu cục bộ lên
+      if (sharedEnabled) {
+        (async function syncShared() {
+          const remoteRaw = await fetchShared();
+          const remote = filterActive(remoteRaw);
+          const localIds = new Set(userWishes.map(w => w.id));
+          const remoteIds = new Set(remote.map(w => w.id));
+
+          // Đẩy lời chúc cục bộ chưa có trên remote
+          for (const w of userWishes) {
+            if (!remoteIds.has(w.id)) putShared(w);
+          }
+          // Gộp lời chúc remote chưa có ở local
+          for (const w of remote) {
+            if (!localIds.has(w.id)) userWishes.push(w);
+          }
+
+          // Xoá các bản ghi đã hết hạn trên remote
+          for (const w of remoteRaw) {
+            if (isExpired(w)) deleteShared(w.id);
+          }
+
+          userWishes = filterActive(userWishes);
+          writeLocal(userWishes);
+          renderWall();
+        })();
+      }
+
+      /* --- Dọn dẹp tự động mỗi 30 phút --- */
+      setInterval(() => {
+        const before = userWishes.length;
+        userWishes = filterActive(userWishes);
+        if (userWishes.length !== before) {
+          writeLocal(userWishes);
+          renderWall();
+        }
+      }, 30 * 60 * 1000);
+    })();
+
+    /* =========================================================
+       5. SCROLL REVEAL CHO KHỐI TĨNH
+       ========================================================= */
+    (function initScrollReveal() {
+      const items = document.querySelectorAll('.reveal:not(.is-visible)');
+      if (!items.length) return;
+      if (!('IntersectionObserver' in window)) {
+        items.forEach(el => el.classList.add('is-visible'));
+        return;
+      }
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const el = entry.target;
+            const siblings = Array.from(el.parentElement.children).filter(c => c.classList.contains('reveal'));
+            const idx = siblings.indexOf(el);
+            if (idx > 0) el.style.transitionDelay = Math.min(idx * 90, 450) + 'ms';
+            el.classList.add('is-visible');
+            observer.unobserve(el);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+      items.forEach(el => observer.observe(el));
+    })();
+
+    /* =========================================================
+       6. NĂM HIỆN TẠI
+       ========================================================= */
+    (function initYear() {
+      const el = document.getElementById('year');
+      if (el) el.textContent = new Date().getFullYear();
+    })();
+  </script>
+</body>
+</html>
