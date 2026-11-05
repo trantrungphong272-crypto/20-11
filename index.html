@@ -719,19 +719,25 @@
       // --- Khởi động ---
       renderWall();
 
-      // Nếu có cấu hình shared DB -> tải + gộp
+           // Nếu có cấu hình shared DB -> tải + gộp
       if (sharedEnabled) {
         (async function syncShared() {
           const remoteRaw = await fetchShared();
           const remote = filterActive(remoteRaw);
-          const localIds = new Set(userWishes.map(w => w.id));
+          
           const remoteIds = new Set(remote.map(w => w.id));
+          const oneMinuteAgo = Date.now() - 60000;
 
-          for (const w of userWishes) {
-            if (!remoteIds.has(w.id)) putShared(w);
-          }
+          userWishes = userWishes.filter(w => {
+             if (w.createdAt && w.createdAt > oneMinuteAgo) return true; 
+             return remoteIds.has(w.id); 
+          });
+
+          const localIds = new Set(userWishes.map(w => w.id));
           for (const w of remote) {
-            if (!localIds.has(w.id)) userWishes.push(w);
+            if (!localIds.has(w.id)) {
+                userWishes.push(w);
+            }
           }
 
           for (const w of remoteRaw) {
