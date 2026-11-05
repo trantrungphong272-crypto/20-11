@@ -89,6 +89,21 @@
     .thin-scroll::-webkit-scrollbar-track { background: transparent; }
     .thin-scroll::-webkit-scrollbar-thumb { background: #ffd9b8; border-radius: 999px; }
 
+    /* Nút nhạc nền */
+    .music-btn {
+      position: fixed; bottom: 20px; right: 20px; z-index: 50;
+      width: 55px; height: 55px; border-radius: 50%;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border: 2px solid #FFDCC0;
+      box-shadow: 0 4px 15px rgba(184, 92, 38, 0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; cursor: pointer; transition: all 0.3s ease;
+    }
+    .music-btn:hover { transform: scale(1.1); }
+    .music-btn.playing { animation: spin 4s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
     @media (prefers-reduced-motion: reduce) {
       .reveal { opacity: 1; transform: none; transition: none; }
       .floaty { animation: none; }
@@ -323,6 +338,16 @@
     </div>
   </footer>
 
+  <!-- NHẠC NỀN VÀ NÚT ĐIỀU KHIỂN -->
+  <audio id="bgMusic" loop>
+    <!-- BẠN HÃY ĐỔI TÊN FILE HOẶC DÁN LINK NHẠC VÀO ĐÂY -->
+    <source src="nguoi-thay.mp3" type="audio/mpeg">
+  </audio>
+  
+  <button id="musicBtn" class="music-btn" title="Bật/Tắt nhạc nền" aria-label="Bật/Tắt nhạc nền">
+    <span id="musicIcon">🎵</span>
+  </button>
+
   <script>
     /* =========================================================
        0. CẤU HÌNH CHÍNH
@@ -330,7 +355,7 @@
     const WISH_LIFETIME_DAYS = 30;
     const WISH_LIFETIME_MS = WISH_LIFETIME_DAYS * 24 * 60 * 60 * 1000;
 
-    // Link Firebase của bạn đã được điền sẵn
+    // Link Firebase của bạn
     const SHARED_DB_URL = 'https://loi-chuc-2011-default-rtdb.asia-southeast1.firebasedatabase.app/loichuc';
 
     /* =========================================================
@@ -502,7 +527,6 @@
       ];
       const EMOJIS = ['🌸', '🌿', '🌼', '🌷', '🍃', '🌻', '💐', '✨'];
 
-      // --- Bộ lọc / hạn 30 ngày (CHẠY NGẦM) ---
       function isExpired(wish) {
         return typeof wish.createdAt === 'number' && (Date.now() - wish.createdAt) > WISH_LIFETIME_MS;
       }
@@ -510,7 +534,6 @@
         return list.filter(w => !isExpired(w));
       }
 
-      // --- localStorage ---
       function readLocal() {
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
@@ -526,7 +549,6 @@
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch {}
       }
 
-      // --- Firebase Sync ---
       const sharedEnabled = !!SHARED_DB_URL;
       const sharedBase = sharedEnabled ? SHARED_DB_URL.replace(/\/+$/, '') : '';
 
@@ -560,17 +582,20 @@
       }
 
       async function deleteShared(id) {
-        if (!sharedEnabled) return;
+        if (!sharedEnabled) return true;
         try {
-          await fetch(sharedBase + '/' + id + '.json', { method: 'DELETE' });
-        } catch (e) { console.warn('[Shared] Không xoá được trên shared DB:', e); }
+          const res = await fetch(sharedBase + '/' + id + '.json', { method: 'DELETE' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return true;
+        } catch (e) { 
+          console.error('[Shared] Lỗi xoá trên Firebase:', e); 
+          return false;
+        }
       }
 
-      // --- Trạng thái ---
       let userWishes = filterActive(readLocal());
       writeLocal(userWishes);
 
-      // --- IntersectionObserver ---
       const io = ('IntersectionObserver' in window)
         ? new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
@@ -587,7 +612,6 @@
         else el.classList.add('is-visible');
       }
 
-      // --- Xây dựng thẻ lời chúc ---
       function buildCard(wish, index, isUserWish) {
         const card = document.createElement('article');
         card.className =
@@ -622,20 +646,30 @@
           delBtn.setAttribute('aria-label', 'Xoá lời chúc');
           delBtn.title = 'Xoá lời chúc của bạn';
           delBtn.textContent = '✕';
-          delBtn.addEventListener('click', () => {
-            userWishes = userWishes.filter(w => w.id !== wish.id);
-            writeLocal(userWishes);
-            deleteShared(wish.id);
-            renderWall();
+          
+          delBtn.addEventListener('click', async () => {
+            delBtn.textContent = '...';
+            delBtn.disabled = true;
+
+            const isDeleted = await deleteShared(wish.id);
+            
+            if (isDeleted) {
+              userWishes = userWishes.filter(w => w.id !== wish.id);
+              writeLocal(userWishes);
+              renderWall();
+            } else {
+              alert('Không thể xoá lời chúc. Vui lòng kiểm tra lại kết nối mạng hoặc cấu hình Firebase Rules!');
+              delBtn.textContent = '✕';
+              delBtn.disabled = false;
+            }
           });
+          
           footerRow.appendChild(delBtn);
         }
         card.appendChild(footerRow);
-
         return card;
       }
 
-      // --- Render toàn bộ tường ---
       function renderWall(highlightId) {
         wallEl.innerHTML = '';
 
@@ -662,12 +696,10 @@
         if (countEl) countEl.textContent = all.length;
       }
 
-      // --- Đếm ký tự ---
       if (msgInput && charCount) {
         msgInput.addEventListener('input', () => { charCount.textContent = msgInput.value.length; });
       }
 
-      // --- Gửi lời chúc ---
       let msgTimer = null;
       function showMessage(text, colorClass) {
         if (!formMsg) return;
@@ -716,10 +748,8 @@
         });
       }
 
-      // --- Khởi động ---
       renderWall();
 
-           // Nếu có cấu hình shared DB -> tải + gộp
       if (sharedEnabled) {
         (async function syncShared() {
           const remoteRaw = await fetchShared();
@@ -728,11 +758,13 @@
           const remoteIds = new Set(remote.map(w => w.id));
           const oneMinuteAgo = Date.now() - 60000;
 
+          // Lọc lại danh sách dưới máy: giữ lại nếu mới tạo < 1 phút, hoặc vẫn tồn tại trên Firebase
           userWishes = userWishes.filter(w => {
              if (w.createdAt && w.createdAt > oneMinuteAgo) return true; 
              return remoteIds.has(w.id); 
           });
 
+          // Gộp lời chúc mới từ Firebase
           const localIds = new Set(userWishes.map(w => w.id));
           for (const w of remote) {
             if (!localIds.has(w.id)) {
@@ -740,6 +772,7 @@
             }
           }
 
+          // Xoá lời chúc hết hạn trên Firebase
           for (const w of remoteRaw) {
             if (isExpired(w)) deleteShared(w.id);
           }
@@ -750,7 +783,6 @@
         })();
       }
 
-      // --- Dọn dẹp tự động mỗi 30 phút ---
       setInterval(() => {
         const before = userWishes.length;
         userWishes = filterActive(userWishes);
@@ -792,6 +824,46 @@
     (function initYear() {
       const el = document.getElementById('year');
       if (el) el.textContent = new Date().getFullYear();
+    })();
+
+    /* =========================================================
+       7. NHẠC NỀN TỰ ĐỘNG (SAU KHI CLICK)
+       ========================================================= */
+    (function initMusic() {
+      const audio = document.getElementById('bgMusic');
+      const btn = document.getElementById('musicBtn');
+      const icon = document.getElementById('musicIcon');
+      if (!audio || !btn) return;
+
+      let isPlaying = false;
+
+      // Trình duyệt chặn tự động phát -> Phát nhạc ngay khi người dùng click vào bất kỳ đâu trên trang
+      document.addEventListener('click', function tryPlay() {
+        if (!isPlaying) {
+          audio.play().then(() => {
+            isPlaying = true;
+            btn.classList.add('playing');
+            icon.textContent = '🎶';
+          }).catch(() => { /* Bỏ qua nếu lỗi (vd: chưa có file mp3) */ });
+        }
+        document.removeEventListener('click', tryPlay);
+      }, { once: true });
+
+      // Bấm nút để Bật/Tắt
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Ngăn sự kiện click lan ra toàn trang
+        if (isPlaying) {
+          audio.pause();
+          isPlaying = false;
+          btn.classList.remove('playing');
+          icon.textContent = '🎵';
+        } else {
+          audio.play();
+          isPlaying = true;
+          btn.classList.add('playing');
+          icon.textContent = '🎶';
+        }
+      });
     })();
   </script>
 </body>
