@@ -241,10 +241,6 @@
             <span>🌷</span>
             <span><strong id="wishCount">0</strong> lời chúc đã được gửi gắm</span>
           </p>
-          <p class="inline-flex items-center gap-2 rounded-full bg-amber-50 px-4 py-2 text-xs text-amber-700 shadow-sm ring-1 ring-amber-200">
-            <span>⏳</span>
-            <span>Mỗi lời chúc được lưu <strong>30 ngày</strong></span>
-          </p>
         </div>
       </div>
 
@@ -263,10 +259,6 @@
           <h2 class="mt-3 font-script text-3xl sm:text-4xl text-[#B85C26]">Gửi một lời tri ân</h2>
           <p class="mt-3 text-sm text-ink/60">
             Lời chúc của bạn sẽ xuất hiện ngay trên tường tri ân phía trên.
-          </p>
-          <p class="mt-1 text-xs text-amber-700/80 inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 ring-1 ring-amber-200/70">
-            <span>⏳</span>
-            <span>Lời chúc được lưu trong 30 ngày, sau đó sẽ tự động biến mất.</span>
           </p>
         </div>
 
@@ -335,29 +327,11 @@
     /* =========================================================
        0. CẤU HÌNH CHÍNH
        ========================================================= */
-    // Số ngày một lời chúc được lưu trước khi tự động biến mất
     const WISH_LIFETIME_DAYS = 30;
     const WISH_LIFETIME_MS = WISH_LIFETIME_DAYS * 24 * 60 * 60 * 1000;
 
-    /* ---------------------------------------------------------
-       TÙY CHỌN: Lưu trữ DÙNG CHUNG trên web (hiển thị với MỌI người)
-       ---------------------------------------------------------
-       Mặc định (để trống): lời chúc chỉ lưu trên trình duyệt của
-       người gửi (localStorage). Vẫn có hạn 30 ngày.
-
-       Muốn lời chúc hiển thị với TẤT CẢ người truy cập trang, chỉ
-       cần làm 4 bước (miễn phí, ~3 phút):
-
-       1. Vào https://console.firebase.google.com → "Add project"
-       2. Trong project: Build → Realtime Database → "Create Database"
-          → chọn location → "Start in test mode"
-       3. Vào tab "Rules", dán rules sau rồi Publish:
-            { "rules": { ".read": true, ".write": true } }
-       4. Copy URL dạng:
-            https://TEN-PROJECT-default-rtdb.firebaseio.com
-          và dán vào biến dưới đây (không có dấu "/" ở cuối).
-       --------------------------------------------------------- */
-    const SHARED_DB_URL = 'https://loi-chuc-2011-default-rtdb.asia-southeast1.firebasedatabase.app/loichuc'; // Ví dụ: 'https://abc-123-default-rtdb.firebaseio.com/loichuc'
+    // Link Firebase của bạn đã được điền sẵn
+    const SHARED_DB_URL = 'https://loi-chuc-2011-default-rtdb.asia-southeast1.firebasedatabase.app/loichuc';
 
     /* =========================================================
        1. HIỆU ỨNG CÁNH HOA RƠI
@@ -496,7 +470,7 @@
     })();
 
     /* =========================================================
-       4. TƯỜNG TRI ÂN + LƯU TRỮ 30 NGÀY + ĐỒNG BỘ TÙY CHỌN
+       4. TƯỜNG TRI ÂN + LƯU TRỮ + ĐỒNG BỘ FIREBASE
        ========================================================= */
     (function initWall() {
       const wallEl = document.getElementById('wall');
@@ -510,7 +484,6 @@
 
       const STORAGE_KEY = 'loiChuc2011_v1';
 
-      /* --- Dữ liệu mẫu (luôn hiển thị, không bị hết hạn) --- */
       const DEFAULT_WISHES = [
         { emoji: '🌸', name: 'Nguyễn Minh Anh', text: 'Cảm ơn cô vì những buổi chiều cô ở lại sửa từng lỗi sai cho em. Cô không biết đâu, chính những lần ấy đã dạy em rằng: kiên nhẫn là một món quà.' },
         { emoji: '🌿', name: 'Trần Quốc Bảo', text: 'Thầy ơi, em vẫn nhớ câu thầy nói ngày tốt nghiệp: "Đi xa rồi nhớ quay về nhé." Giờ em đi xa thật rồi, và em vẫn luôn nhớ đường về.' },
@@ -529,25 +502,20 @@
       ];
       const EMOJIS = ['🌸', '🌿', '🌼', '🌷', '🍃', '🌻', '💐', '✨'];
 
-      /* --- Bộ lọc / hạn 30 ngày --- */
+      // --- Bộ lọc / hạn 30 ngày (CHẠY NGẦM) ---
       function isExpired(wish) {
         return typeof wish.createdAt === 'number' && (Date.now() - wish.createdAt) > WISH_LIFETIME_MS;
       }
       function filterActive(list) {
         return list.filter(w => !isExpired(w));
       }
-      function daysLeft(wish) {
-        if (typeof wish.createdAt !== 'number') return WISH_LIFETIME_DAYS;
-        return Math.ceil((wish.createdAt + WISH_LIFETIME_MS - Date.now()) / (24 * 60 * 60 * 1000));
-      }
 
-      /* --- localStorage --- */
+      // --- localStorage ---
       function readLocal() {
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
           const data = raw ? JSON.parse(raw) : [];
           if (!Array.isArray(data)) return [];
-          // Migration: bổ sung createdAt cho dữ liệu cũ
           return data.map(w => ({
             ...w,
             createdAt: typeof w.createdAt === 'number' ? w.createdAt : Date.now(),
@@ -558,7 +526,7 @@
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(list)); } catch {}
       }
 
-      /* --- Đồng bộ dùng chung qua Firebase REST (nếu có cấu hình) --- */
+      // --- Firebase Sync ---
       const sharedEnabled = !!SHARED_DB_URL;
       const sharedBase = sharedEnabled ? SHARED_DB_URL.replace(/\/+$/, '') : '';
 
@@ -598,11 +566,11 @@
         } catch (e) { console.warn('[Shared] Không xoá được trên shared DB:', e); }
       }
 
-      /* --- Trạng thái --- */
+      // --- Trạng thái ---
       let userWishes = filterActive(readLocal());
       writeLocal(userWishes);
 
-      /* --- IntersectionObserver cho hiệu ứng reveal --- */
+      // --- IntersectionObserver ---
       const io = ('IntersectionObserver' in window)
         ? new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
@@ -619,7 +587,7 @@
         else el.classList.add('is-visible');
       }
 
-      /* --- Xây dựng một thẻ lời chúc --- */
+      // --- Xây dựng thẻ lời chúc ---
       function buildCard(wish, index, isUserWish) {
         const card = document.createElement('article');
         card.className =
@@ -638,7 +606,6 @@
         textEl.textContent = wish.text;
         card.appendChild(textEl);
 
-        // Dòng chân: tên + nút xoá
         const footerRow = document.createElement('div');
         footerRow.className = 'mt-5 flex items-center justify-between gap-3';
 
@@ -658,35 +625,17 @@
           delBtn.addEventListener('click', () => {
             userWishes = userWishes.filter(w => w.id !== wish.id);
             writeLocal(userWishes);
-            deleteShared(wish.id); // fire and forget
+            deleteShared(wish.id);
             renderWall();
           });
           footerRow.appendChild(delBtn);
         }
         card.appendChild(footerRow);
 
-        // Chỉ hiện hạn cho lời chúc người dùng gửi
-        if (isUserWish) {
-          const left = daysLeft(wish);
-          const expEl = document.createElement('div');
-          expEl.className = 'mt-3 pt-3 border-t border-current/5 flex items-center gap-1.5 text-[11px] font-medium tracking-wide';
-          if (left <= 1) {
-            expEl.classList.add('text-red-500/80');
-            expEl.innerHTML = '<span>⏳</span><span>Hết hạn trong hôm nay</span>';
-          } else if (left <= 5) {
-            expEl.classList.add('text-amber-600');
-            expEl.innerHTML = '<span>⏳</span><span>Còn ' + left + ' ngày</span>';
-          } else {
-            expEl.classList.add('text-ink/40');
-            expEl.innerHTML = '<span>⏳</span><span>Còn ' + left + ' / ' + WISH_LIFETIME_DAYS + ' ngày</span>';
-          }
-          card.appendChild(expEl);
-        }
-
         return card;
       }
 
-      /* --- Render toàn bộ tường --- */
+      // --- Render toàn bộ tường ---
       function renderWall(highlightId) {
         wallEl.innerHTML = '';
 
@@ -713,12 +662,12 @@
         if (countEl) countEl.textContent = all.length;
       }
 
-      /* --- Đếm ký tự --- */
+      // --- Đếm ký tự ---
       if (msgInput && charCount) {
         msgInput.addEventListener('input', () => { charCount.textContent = msgInput.value.length; });
       }
 
-      /* --- Gửi lời chúc --- */
+      // --- Gửi lời chúc ---
       let msgTimer = null;
       function showMessage(text, colorClass) {
         if (!formMsg) return;
@@ -753,7 +702,7 @@
 
           userWishes.unshift(newWish);
           writeLocal(userWishes);
-          putShared(newWish); // fire and forget
+          putShared(newWish);
           renderWall(newWish.id);
 
           form.reset();
@@ -767,10 +716,10 @@
         });
       }
 
-      /* --- Khởi động --- */
+      // --- Khởi động ---
       renderWall();
 
-      // Nếu có cấu hình shared DB → tải + gộp + đẩy dữ liệu cục bộ lên
+      // Nếu có cấu hình shared DB -> tải + gộp
       if (sharedEnabled) {
         (async function syncShared() {
           const remoteRaw = await fetchShared();
@@ -778,16 +727,13 @@
           const localIds = new Set(userWishes.map(w => w.id));
           const remoteIds = new Set(remote.map(w => w.id));
 
-          // Đẩy lời chúc cục bộ chưa có trên remote
           for (const w of userWishes) {
             if (!remoteIds.has(w.id)) putShared(w);
           }
-          // Gộp lời chúc remote chưa có ở local
           for (const w of remote) {
             if (!localIds.has(w.id)) userWishes.push(w);
           }
 
-          // Xoá các bản ghi đã hết hạn trên remote
           for (const w of remoteRaw) {
             if (isExpired(w)) deleteShared(w.id);
           }
@@ -798,7 +744,7 @@
         })();
       }
 
-      /* --- Dọn dẹp tự động mỗi 30 phút --- */
+      // --- Dọn dẹp tự động mỗi 30 phút ---
       setInterval(() => {
         const before = userWishes.length;
         userWishes = filterActive(userWishes);
@@ -810,7 +756,7 @@
     })();
 
     /* =========================================================
-       5. SCROLL REVEAL CHO KHỐI TĨNH
+       5. SCROLL REVEAL
        ========================================================= */
     (function initScrollReveal() {
       const items = document.querySelectorAll('.reveal:not(.is-visible)');
