@@ -340,7 +340,6 @@
 
   <!-- NHẠC NỀN VÀ NÚT ĐIỀU KHIỂN -->
   <audio id="bgMusic" loop>
-    <!-- BẠN HÃY ĐỔI TÊN FILE HOẶC DÁN LINK NHẠC VÀO ĐÂY -->
     <source src="nguoi-thay.mp3" type="audio/mpeg">
   </audio>
   
@@ -509,14 +508,8 @@
 
       const STORAGE_KEY = 'loiChuc2011_v1';
 
-      const DEFAULT_WISHES = [
-        { emoji: '🌸', name: 'Nguyễn Minh Anh', text: 'Cảm ơn cô vì những buổi chiều cô ở lại sửa từng lỗi sai cho em. Cô không biết đâu, chính những lần ấy đã dạy em rằng: kiên nhẫn là một món quà.' },
-        { emoji: '🌿', name: 'Trần Quốc Bảo', text: 'Thầy ơi, em vẫn nhớ câu thầy nói ngày tốt nghiệp: "Đi xa rồi nhớ quay về nhé." Giờ em đi xa thật rồi, và em vẫn luôn nhớ đường về.' },
-        { emoji: '🌼', name: 'Lê Thu Hà', text: 'Cô là người đầu tiên nói với em rằng em có thể làm được. Chỉ một câu thôi, nhưng em mang theo nó suốt mười năm nay.' },
-        { emoji: '🌷', name: 'Phạm Đức Duy', text: 'Cảm ơn thầy vì đã không bỏ rơi đứa học trò cá biệt ngày nào. Thầy đã tin em khi cả trường không tin. Ơn này em khắc ghi.' },
-        { emoji: '🍃', name: 'Hoàng Mai Linh', text: 'Mỗi bài giảng của cô là một cánh cửa mở ra thế giới. Cảm ơn cô đã mở thật nhiều cánh cửa cho chúng em.' },
-        { emoji: '🌻', name: 'Vũ Thanh Tùng', text: 'Thầy cô ơi, chúng em lớn lên rồi, nhưng mỗi lần đi ngang cổng trường, tim vẫn đập nhanh như ngày đầu tiên vào lớp 10. Cảm ơn thầy cô vì tuổi trẻ ấy.' },
-      ];
+      // ĐÃ XOÁ TOÀN BỘ LỜI CHÚC MẪU TẠI ĐÂY
+      const DEFAULT_WISHES = []; 
 
       const PALETTES = [
         'bg-[#FFF6EC] border-[#FFE0C2]',
@@ -683,15 +676,27 @@
           .map(w => ({ wish: w, isUser: true }))
           .concat(DEFAULT_WISHES.map(w => ({ wish: w, isUser: false })));
 
-        all.forEach((item, index) => {
-          const card = buildCard(item.wish, index, item.isUser);
-          if (highlightId && item.wish.id === highlightId) {
-            card.classList.add('is-visible', 'pop-in');
-          } else {
-            observe(card);
-          }
-          wallEl.appendChild(card);
-        });
+        // NẾU TƯỜNG TRỐNG, HIỂN THỊ LỜI MỜI GỌI
+        if (all.length === 0) {
+          const emptyEl = document.createElement('div');
+          emptyEl.className = 'col-span-full py-12 text-center reveal is-visible';
+          emptyEl.innerHTML = `
+            <div class="text-5xl mb-4">🌱</div>
+            <p class="text-lg text-ink/60 italic font-medium">Tường đang trống...</p>
+            <p class="text-sm text-ink/50 mt-2">Hãy là người đầu tiên gửi lời tri ân đến thầy cô nhé!</p>
+          `;
+          wallEl.appendChild(emptyEl);
+        } else {
+          all.forEach((item, index) => {
+            const card = buildCard(item.wish, index, item.isUser);
+            if (highlightId && item.wish.id === highlightId) {
+              card.classList.add('is-visible', 'pop-in');
+            } else {
+              observe(card);
+            }
+            wallEl.appendChild(card);
+          });
+        }
 
         if (countEl) countEl.textContent = all.length;
       }
@@ -758,13 +763,11 @@
           const remoteIds = new Set(remote.map(w => w.id));
           const oneMinuteAgo = Date.now() - 60000;
 
-          // Lọc lại danh sách dưới máy: giữ lại nếu mới tạo < 1 phút, hoặc vẫn tồn tại trên Firebase
           userWishes = userWishes.filter(w => {
              if (w.createdAt && w.createdAt > oneMinuteAgo) return true; 
              return remoteIds.has(w.id); 
           });
 
-          // Gộp lời chúc mới từ Firebase
           const localIds = new Set(userWishes.map(w => w.id));
           for (const w of remote) {
             if (!localIds.has(w.id)) {
@@ -772,7 +775,6 @@
             }
           }
 
-          // Xoá lời chúc hết hạn trên Firebase
           for (const w of remoteRaw) {
             if (isExpired(w)) deleteShared(w.id);
           }
@@ -837,21 +839,19 @@
 
       let isPlaying = false;
 
-      // Trình duyệt chặn tự động phát -> Phát nhạc ngay khi người dùng click vào bất kỳ đâu trên trang
       document.addEventListener('click', function tryPlay() {
         if (!isPlaying) {
           audio.play().then(() => {
             isPlaying = true;
             btn.classList.add('playing');
             icon.textContent = '🎶';
-          }).catch(() => { /* Bỏ qua nếu lỗi (vd: chưa có file mp3) */ });
+          }).catch(() => { /* Bỏ qua nếu lỗi */ });
         }
         document.removeEventListener('click', tryPlay);
       }, { once: true });
 
-      // Bấm nút để Bật/Tắt
       btn.addEventListener('click', (e) => {
-        e.stopPropagation(); // Ngăn sự kiện click lan ra toàn trang
+        e.stopPropagation(); 
         if (isPlaying) {
           audio.pause();
           isPlaying = false;
